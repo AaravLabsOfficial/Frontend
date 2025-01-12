@@ -2,6 +2,13 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select/index.js';
 
+    // Make topic and difficulty bindable so that it can be passed to Question
+	let { topic = $bindable('all'), difficulty = $bindable('all') } = $props<{
+		topic: string;
+		difficulty: string;
+	}>();
+
+    // Array used to change the values to a human readable name
 	const topics = [
 		{ value: 'algebra', label: 'Algebra' },
 		{ value: 'intermediate_algebra', label: 'Intermediate Algebra' },
@@ -13,15 +20,12 @@
 		{ value: 'all', label: 'All' }
 	];
 
-	let { topic = $bindable('all'), difficulty = $bindable('all') } = $props<{
-		topic: string;
-		difficulty: string;
-	}>();
-
+    // Make the human readable name for the seleted topic using the topics array
 	const selectedTopicName = $derived(
 		topic ? topics.find((topics) => topics.value === topic)?.label : 'Select a topic'
 	);
 
+    // Array used to change the values to a human readable name
 	const difficulties = [
 		{ value: '1', label: '1' },
 		{ value: '2', label: '2' },
@@ -31,6 +35,7 @@
 		{ value: 'all', label: 'All' }
 	];
 
+    // Make the human readable name for the seleted difficulty using the difficulties array
 	const selectedDifficulty = $derived(
 		difficulty
 			? difficulties.find((difficulties) => difficulties.value === difficulty)?.label
@@ -44,6 +49,7 @@
 	</Card.Header>
 	<Card.Content>
 		<span class="text-lg font-semibold">Topic: </span> <br />
+        <!-- Topic Chooser -->
 		<Select.Root type="single" onValueChange={(v) => (topic = v)}>
 			<Select.Trigger aria-label="Select a topic">
 				{selectedTopicName}
@@ -63,6 +69,7 @@
 		<br />
 		<span class="text-lg font-semibold">Question Difficulty: </span> <br />
 
+        <!-- Difficulty Chooser -->
 		<Select.Root type="single" onValueChange={(v) => (difficulty = v)}>
 			<Select.Trigger aria-label="Select a difficulty">
 				{selectedDifficulty}

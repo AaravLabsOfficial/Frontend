@@ -3,6 +3,7 @@
 	import Question from '$lib/components/question.svelte';
 </script>
 
+<!-- currentPage is so that that page is bolded and disabled on the navbar -->
 <Navbar currentPage="Home"></Navbar>
 
 <table style="width: 100%;">
@@ -22,6 +23,7 @@
 			</td>
 			<td style="width: 49.99%; height: 100%;">
 				<div class="m-auto h-full w-3/4 text-start">
+                    <!-- A fake question so that we have an interactive element instead of a static image -->
 					<Question topic="all" difficulty="all" fake={true}></Question>
 				</div>
 			</td>
@@ -30,6 +32,7 @@
 		<tr class="maxSize" style="height:330px">
 			<td style="width: 49.99%; height: 100%;">
 				<div class="m-auto h-full w-3/4 text-start">
+                    <!-- A fake question so that we have an interactive element instead of a static image -->
 					<Question
 						topic="all"
 						difficulty="all"

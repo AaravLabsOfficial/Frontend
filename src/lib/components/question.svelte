@@ -1,3 +1,5 @@
+<!-- Math practice component for rendering and evaluating math problems -->
+<!-- Imports required UI components and utilities -->
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
@@ -6,8 +8,10 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { PUBLIC_API_URL } from '$env/static/public';
-	import { redirect } from '@sveltejs/kit';
 
+	// Renders a single math expression using KaTeX
+	// @param input - The math expression to render
+	// @param displayMode - Whether to render in display (block) or inline mode
 	function renderMathSegment(input: string, displayMode: boolean): string {
 		return katex.renderToString(String.raw({ raw: input }), {
 			displayMode: displayMode,
@@ -15,16 +19,17 @@
 		});
 	}
 
-	// TODO: Cleanup this function
+	// Processes text containing multiple math expressions and converts them to rendered HTML
+	// Handles both inline ($, \(\)) and display ($$, \[\]) math
 	function renderMath(input: string): string {
-		// Finds $$ and \(\)
+		// Regular expressions for finding different types of math delimiters
 		let inlineRegex = [/(?<!\\)\$\s*[\s\S]*?(?<!\\)\$/g, /(?<!\\)\\\(\s*[\s\S]*?(?<!\\)\\\)/g];
-		// Finds $$$$ and \[\]
 		let displayRegex = [/(?<!\\)\$\$\s*[\s\S]*?(?<!\\)\$\$/g, /(?<!\\)\\\[\s*[\s\S]*?(?<!\\)\\\]/g];
 
-		// TODO: This breaks some stuff, add newlines AFTER regex.
+		// Convert newlines to HTML breaks
 		let output = input.replace(/\n/g, '<br />');
 
+		// Process \(...\) inline math
 		let match = undefined;
 		while ((match = inlineRegex[1].exec(output)) != null) {
 			const startIndex = match.index;
@@ -34,6 +39,7 @@
 			output = output.substring(0, startIndex) + value + output.substring(endIndex, output.length);
 		}
 
+		// Process $$ display math
 		match = undefined;
 		while ((match = displayRegex[0].exec(output)) != null) {
 			const startIndex = match.index;
@@ -43,6 +49,7 @@
 			output = output.substring(0, startIndex) + value + output.substring(endIndex, output.length);
 		}
 
+		// Process \[...\] display math
 		match = undefined;
 		while ((match = displayRegex[1].exec(output)) != null) {
 			const startIndex = match.index;
@@ -52,6 +59,7 @@
 			output = output.substring(0, startIndex) + value + output.substring(endIndex, output.length);
 		}
 
+		// Process $ inline math
 		match = undefined;
 		while ((match = inlineRegex[0].exec(output)) != null) {
 			const startIndex = match.index;
@@ -64,6 +72,7 @@
 		return output;
 	}
 
+	// State variables for the question and user input
 	let question = $state('');
 	let renderedQuestion: string = $derived.by((): string => renderMath(question));
 
@@ -76,12 +85,14 @@
 	let fullAnswer = $state('');
 	let renderedFullAnswer: string = $derived.by((): string => renderMath(fullAnswer));
 
+	// State variables for analysis and feedback
 	let stepsAnalysis = $state('');
 	let renderedStepsAnalysis: string = $derived.by((): string => renderMath(stepsAnalysis));
 
 	let answerAnalysis = $state('');
 	let renderedAnswerAnalysis: string = $derived.by((): string => renderMath(answerAnalysis));
 
+	// Component props with default values
 	let {
 		topic = $bindable('all'),
 		difficulty = $bindable('all'),
@@ -110,6 +121,7 @@
 		answerCorrectProp?: boolean;
 	}>();
 
+	// Available math topics and their display names
 	const acceptedTopics = [
 		'all',
 		'algebra',
@@ -131,18 +143,21 @@
 		'Precalculus'
 	];
 
+	// State variables for tracking topic and difficulty changes
 	let renderedTopic = $state();
 	let renderedDifficulty = $state();
 
 	let previousTopic = $state(topic);
 	let previousDifficulty = $state(difficulty);
 
+	// State variables for correctness and error tracking
 	let stepsCorrect: boolean | undefined = $state(undefined);
 	let answerCorrect: boolean | undefined = $state(undefined);
 
 	let stepsError: boolean = $state(false);
 	let answerError: boolean = $state(false);
 
+	// Fetches a new question from the API based on topic and difficulty
 	const renderQuestion = () => {
 		if (loadQuestion) {
 			fetch(`${PUBLIC_API_URL}/?topic=${topic}&difficulty=${difficulty}`)
@@ -150,6 +165,7 @@
 					return response.json();
 				})
 				.then((body) => {
+					// Skip questions with complex formatting
 					if (
 						body.question.includes('[asy') ||
 						body.question.includes('\\begin{') ||
@@ -167,26 +183,26 @@
 		}
 	};
 
+	// Effect to handle topic changes
 	$effect(() => {
 		if (topic != previousTopic) {
-			// Topic changed, get a new question
 			renderQuestion();
 			previousTopic = topic;
 		}
 	});
 
+	// Effect to handle difficulty changes
 	$effect(() => {
 		if (difficulty != previousDifficulty) {
-			// Topic changed, get a new question
 			renderQuestion();
 			previousDifficulty = difficulty;
 		}
 	});
 
 	let solved = $state(false);
-
 	let loadQuestion = true;
 
+	// Effect to handle fake/mock mode
 	$effect(() => {
 		if (fake) {
 			if (solvedProp) {
@@ -232,25 +248,30 @@
 		}
 	});
 
+	// Initialize component by loading first question
 	onMount(renderQuestion);
 
+	// Handles submission of user's solution
 	const solveQuestion = async () => {
 		if (!fake) {
-			if (steps.replaceAll(' ', '').replaceAll(/\n/g, '') == '' || answer.replaceAll(' ', '').replaceAll(/\n/g, '') == '') {
-                if (steps.replaceAll(' ', '').replaceAll(/\n/g, '') == ''){
-                    // Steps is empty
-                    stepsError = true
-                } else {
-                    stepsError = false
-                }
-                if (answer.replaceAll(' ', '').replaceAll(/\n/g, '') == ''){
-                    // Answer is empty
-                    answerError = true
-                } else {
-                    answerError = false
-                }
-            } else {
-                // API call
+			if (
+				steps.replaceAll(' ', '').replaceAll(/\n/g, '') == '' ||
+				answer.replaceAll(' ', '').replaceAll(/\n/g, '') == ''
+			) {
+				if (steps.replaceAll(' ', '').replaceAll(/\n/g, '') == '') {
+					// Mark steps as empty
+					stepsError = true;
+				} else {
+					stepsError = false;
+				}
+				if (answer.replaceAll(' ', '').replaceAll(/\n/g, '') == '') {
+					// Mark answer as empty
+					answerError = true;
+				} else {
+					answerError = false;
+				}
+			} else {
+				// Submit solution to API for analysis
 				let response = await fetch(PUBLIC_API_URL + '/aiAnalysis', {
 					method: 'POST',
 					headers: {
@@ -267,24 +288,25 @@
 				const responseData = await response.json();
 				console.log('Success: ', responseData);
 
-				// Set stepsAnalysis and answerAnalysis
-
+				// Update feedback and correctness states
 				stepsAnalysis = responseData.stepsAnalysis;
 				answerAnalysis = responseData.answerAnalysis;
 				stepsCorrect = responseData.stepsCorrect;
 				answerCorrect = responseData.answerCorrect;
 
-				// Show solved view
-                solved = true;
-            }
+				// Show solution review
+				solved = true;
+			}
 		} else {
-            console.log("FAKEEE")
+			console.log('FAKEEE');
 			location.replace('/practice');
 		}
 	};
 
+	// Handles progression to next question
 	const nextQuestion = () => {
 		if (!fake) {
+			// Reset all states and load new question
 			solved = false;
 			stepsAnalysis = '';
 			answerAnalysis = '';
@@ -299,6 +321,7 @@
 	};
 </script>
 
+<!-- Load KaTeX CSS for math rendering -->
 {#if browser}
 	<link
 		rel="stylesheet"
@@ -308,24 +331,29 @@
 	/>
 {/if}
 
+<!-- Practice mode UI -->
 {#if !solved}
 	<Card.Root class="drop-shadow-glow">
 		<Card.Header>
-			<!-- TODO: MAKE SCROLLABLE!!! -->
 			<Card.Title class="font-normal">{@html renderedQuestion}</Card.Title>
 			<Card.Description>{renderedTopic} - Level {renderedDifficulty}</Card.Description>
 		</Card.Header>
 		<Card.Content>
+			<!-- Skip question button -->
 			<Button variant="default" onclick={renderQuestion}>Skip Question</Button><br /><br />
+
+			<!-- Steps input section -->
 			<span class="font-semibold">Steps: </span> <br />
 			<textarea
 				bind:value={steps}
 				class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
 			>
 			</textarea>
+			<!-- Steps error message -->
 			{#if stepsError}
 				<div class="mt-3 text-sm text-red-500">Steps can't be empty!</div>
 			{/if}
+			<!-- Steps preview with LaTeX rendering -->
 			{#if renderedSteps.replaceAll(' ', '').replaceAll('<br/>', '') != ''}
 				<br />
 				<span>Preview: </span>
@@ -335,12 +363,16 @@
 					<span contenteditable="false">{@html renderedSteps}</span>
 				</div>
 			{/if}
+
+			<!-- Answer input section -->
 			<br />
 			<span class="font-semibold">Answer: </span> <br />
 			<Input bind:value={answer}></Input>
+			<!-- Answer error message -->
 			{#if answerError}
 				<div class="mt-3 text-sm text-red-500">Answer can't be empty!</div>
 			{/if}
+			<!-- Answer preview with LaTeX rendering -->
 			{#if renderedAnswer.replaceAll(' ', '').replaceAll('<br/>', '') != ''}
 				<br />
 				<span>Preview: </span>
@@ -356,9 +388,10 @@
 		</Card.Footer>
 	</Card.Root>
 {:else}
+	<!-- Solution review mode UI -->
 	<Card.Root class="drop-shadow-glow">
 		<Card.Header>
-			<!-- TODO: MAKE SCROLLABLE!!! -->
+			<!-- Correctness indicator -->
 			{#if answerCorrect}
 				<Card.Title class="text-xl">Correct! Way to go!</Card.Title>
 			{:else}
@@ -366,6 +399,7 @@
 			{/if}
 		</Card.Header>
 		<Card.Content>
+			<!-- Original question display -->
 			<span class="font-semibold">Question: </span>
 			<div
 				class="mb-4 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm md:text-sm"
@@ -373,12 +407,14 @@
 				<span contenteditable="false">{@html renderedQuestion}</span>
 			</div>
 
+			<!-- User's steps with feedback -->
 			<span class="font-semibold">Your Steps: </span>
 			<div
 				class="mb-4 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm md:text-sm"
 			>
 				<span contenteditable="false">{@html renderedSteps}</span>
 				<br /><br />
+				<!-- Feedback container with conditional styling based on correctness -->
 				<div
 					class="rounded-lg p-3 {stepsCorrect != undefined
 						? stepsCorrect == true
@@ -390,12 +426,14 @@
 				</div>
 			</div>
 
+			<!-- User's answer with feedback -->
 			<span class="font-semibold">Your Answer: </span> <br />
 			<div
 				class="mb-4 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm md:text-sm"
 			>
 				<span contenteditable="false">{@html renderedAnswer}</span>
 				<br /><br />
+				<!-- Feedback container with conditional styling based on correctness -->
 				<div
 					class="rounded-lg p-3 {answerCorrect != undefined
 						? answerCorrect == true
@@ -407,6 +445,7 @@
 				</div>
 			</div>
 
+			<!-- Complete solution display -->
 			<span class="font-semibold">Full Answer: </span> <br />
 			<div
 				class="mb-4 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm md:text-sm"
@@ -415,6 +454,7 @@
 			</div>
 		</Card.Content>
 		<Card.Footer>
+			<!-- Next question button -->
 			<Button variant="default" onclick={nextQuestion}>Next Question</Button>
 		</Card.Footer>
 	</Card.Root>

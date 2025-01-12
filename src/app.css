@@ -103,6 +103,14 @@ body {
     -ms-user-select: none;
 }
 
+.background-image-helper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -5;
+}
+
 body {
     font-family: geist-sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol, "Noto Color Emoji";
 }
