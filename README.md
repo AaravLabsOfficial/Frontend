@@ -1,6 +1,6 @@
 # AaravLabs Frontend
 
-This is the frontend for AaravLabs. AaravLabs is a fun, educational website for middle schoolers. It combines tough but intresting questions with AI analysis to helps kids know what they got right or where they went wrong.
+This is the frontend for AaravLabs. Aarav Labs is an innovative learning platform designed to help middle schoolers with AI steps and answer analysis. It combines tough but intresting questions with AI analysis to helps kids know what they got right or where they went wrong.
 
 ## Building
 
