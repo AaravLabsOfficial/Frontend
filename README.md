@@ -2,6 +2,9 @@
 
 This is the frontend for AaravLabs. Aarav Labs is an innovative learning platform designed to help middle schoolers with AI steps and answer analysis. It combines tough but intresting questions with AI analysis to helps kids know what they got right or where they went wrong.
 
+[Correct example image](READMEimages/correct.png)
+[Incorrect example image](READMEimages/incorrect.png)
+
 ## Building
 
 To build the frontend:
