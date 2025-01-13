@@ -8,13 +8,13 @@ This is the frontend for AaravLabs. Aarav Labs is an innovative learning platfor
 ## Building
 
 To build the frontend:
-1. Build and deploy [the backend](https://github.com/AaravLabsOffical/Backend) and update the url in `.env` to match your backend url.
+1. Build and deploy [the backend](https://github.com/AaravLabsOfficial/Backend) and update the url in `.env` to match your backend url.
 2. Go to `package.json` and replace the `--push` part of the `docker` script `yourusername/aaravlabs`
 3. Run `npm i` to install required dependencies
 4. Run `npm run docker` to build and push to Docker Hub
 
-To use this, you need [the backend](https://github.com/AaravLabsOffical/Backend) too.
-It is reccomended that you use the `docker-compose.yaml` given in [the main repository](https://github.com/AaravLabsOffical/AaravLabs) for the best experience.
+To use this, you need [the backend](https://github.com/AaravLabsOfficial/Backend) too.
+It is reccomended that you use the `docker-compose.yaml` given in [the main repository](https://github.com/AaravLabsOfficial/AaravLabs) for the best experience.
 
 ## Usage
 
